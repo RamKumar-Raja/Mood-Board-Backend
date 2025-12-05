@@ -1,0 +1,249 @@
+MOODBOARD API DOCUMENTATION
+==========================
+
+BASE URL: http://localhost:3000
+AUTHENTICATION: All protected endpoints require 'x-user-id' header with user UUID
+
+================================================================================
+AUTHENTICATION ENDPOINTS
+================================================================================
+
+POST /auth/signup
+- Description: Register new user
+- Headers: None
+- Payload:
+  {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123"
+  }
+- Response: { "user": { "id": "uuid", "name": "...", "email": "...", "createdAt": "..." } }
+
+POST /auth/login
+- Description: Authenticate user
+- Headers: None
+- Payload:
+  {
+    "email": "john@example.com",
+    "password": "password123"
+  }
+- Response: { "user": { "id": "uuid", "name": "...", "email": "...", "createdAt": "..." } }
+
+POST /auth/logout
+- Description: Logout user
+- Headers: None
+- Payload: None
+- Response: { "message": "Logged out successfully" }
+
+================================================================================
+BOARD ENDPOINTS
+================================================================================
+
+POST /boards
+- Description: Create new board
+- Headers: { "x-user-id": "user-uuid" }
+- Payload:
+  {
+    "title": "Board Title",
+    "description": "Optional description",
+    "isPublic": false
+  }
+- Response: Board object with id, shareId, etc.
+
+GET /boards
+- Description: Get user's boards
+- Headers: { "x-user-id": "user-uuid" }
+- Payload: None
+- Response: Array of board objects with tiles included
+
+GET /boards/:boardId
+- Description: Get specific board
+- Headers: { "x-user-id": "user-uuid" }
+- Payload: None
+- Response: Board object with tiles and activityLogs
+
+PUT /boards/:boardId
+- Description: Update board
+- Headers: { "x-user-id": "user-uuid" }
+- Payload:
+  {
+    "title": "Updated Title",
+    "description": "Updated description",
+    "isPublic": true
+  }
+- Response: Updated board object
+
+DELETE /boards/:boardId
+- Description: Delete board
+- Headers: { "x-user-id": "user-uuid" }
+- Payload: None
+- Response: { "message": "Board deleted successfully" }
+
+================================================================================
+TILE ENDPOINTS
+================================================================================
+
+POST /boards/:boardId/tiles
+- Description: Add tile to board
+- Headers: { "x-user-id": "user-uuid" }
+- Payload:
+  {
+    "imageUrl": "https://cloudinary.com/image.jpg",
+    "caption": "Optional caption",
+    "tags": ["tag1", "tag2"],
+    "positionX": 100,
+    "positionY": 200
+  }
+- Response: Created tile object
+
+PUT /boards/:boardId/tiles/:tileId
+- Description: Update tile
+- Headers: { "x-user-id": "user-uuid" }
+- Payload:
+  {
+    "caption": "Updated caption",
+    "tags": ["updated", "tags"],
+    "positionX": 150,
+    "positionY": 250
+  }
+- Response: Updated tile object
+
+DELETE /boards/:boardId/tiles/:tileId
+- Description: Delete tile
+- Headers: { "x-user-id": "user-uuid" }
+- Payload: None
+- Response: { "message": "Tile deleted successfully" }
+
+================================================================================
+ACTIVITY LOG ENDPOINTS
+================================================================================
+
+GET /boards/:boardId/logs?page=1&limit=10
+- Description: Get board activity logs
+- Headers: { "x-user-id": "user-uuid" }
+- Query Params: page, limit
+- Payload: None
+- Response:
+  {
+    "logs": [array of log objects],
+    "pagination": { "page": 1, "limit": 10, "total": 25, "pages": 3 }
+  }
+
+POST /boards/:boardId/logs
+- Description: Add activity log
+- Headers: { "x-user-id": "user-uuid" }
+- Payload: { "action": "Custom log message" }
+- Response: Created log object
+
+================================================================================
+UPLOAD ENDPOINTS
+================================================================================
+
+POST /upload/image
+- Description: Upload image to Cloudinary
+- Headers: None
+- Content-Type: multipart/form-data
+- Form Data: image (file)
+- Response: { "url": "cloudinary-url", "public_id": "cloudinary-id" }
+
+DELETE /upload/image/:public_id
+- Description: Delete image from Cloudinary
+- Headers: None
+- Payload: None
+- Response: { "message": "Image deleted successfully" }
+
+================================================================================
+ERROR RESPONSES
+================================================================================
+
+All errors return: { "error": "Error message" }
+
+Common Status Codes:
+- 400: Bad Request (validation errors)
+- 401: Unauthorized (missing userId)
+- 404: Not Found
+- 409: Conflict (duplicate data)
+- 500: Internal Server Error
+
+================================================================================
+FRONTEND INTEGRATION NOTES
+================================================================================
+
+1. Store user ID after login/signup
+2. Include 'x-user-id' header in ALL protected API requests
+3. Upload images first, then create tiles with returned URLs
+4. Use positionX/Y for drag-and-drop tile positioning
+5. Public boards accessible without userId header
+6. Handle errors gracefully with user-friendly messages
+
+================================================================================
+SAMPLE JAVASCRIPT AXIOS SETUP
+================================================================================
+
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:3000',
+});
+
+// Add userId to all requests
+api.interceptors.request.use((config) => {
+  const userId = localStorage.getItem('userId');
+  if (userId) {
+    config.headers['x-user-id'] = userId;
+  }
+  return config;
+});
+
+// Usage
+const boards = await api.get('/boards');
+const newBoard = await api.post('/boards', {
+  title: 'My Board',
+  description: 'Description',
+  isPublic: false
+});
+
+================================================================================
+DATA MODELS
+================================================================================
+
+User:
+{
+  id: string,
+  name?: string,
+  email: string,
+  createdAt: string
+}
+
+Board:
+{
+  id: string,
+  userId: string,
+  title: string,
+  description?: string,
+  isPublic: boolean,
+  shareId: string,
+  tiles: Tile[],
+  createdAt: string
+}
+
+Tile:
+{
+  id: string,
+  boardId: string,
+  imageUrl: string,
+  caption?: string,
+  tags?: string[],
+  positionX: number,
+  positionY: number,
+  createdAt: string
+}
+
+ActivityLog:
+{
+  id: string,
+  boardId: string,
+  userId: string,
+  action: string,
+  createdAt: string
+}

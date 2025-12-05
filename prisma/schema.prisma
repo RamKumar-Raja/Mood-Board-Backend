@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl= env("DIRECT_URL")
+}
+
+model User {
+  id           String       @id @default(uuid())
+  name         String?
+  email        String       @unique
+  password     String
+  boards       Board[]
+  activityLogs ActivityLog[]
+  createdAt    DateTime     @default(now())
+}
+
+model Board {
+  id           String       @id @default(uuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id])
+  title        String
+  description  String?
+  isPublic     Boolean      @default(false)
+  shareId      String       @unique
+  tiles        Tile[]
+  activityLogs ActivityLog[]
+  createdAt    DateTime     @default(now())
+}
+
+model Tile {
+  id        String   @id @default(uuid())
+  boardId   String
+  board     Board    @relation(fields: [boardId], references: [id])
+  imageUrl  String
+  caption   String?
+  tags      Json?
+  positionX Int      @default(0)
+  positionY Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model ActivityLog {
+  id       String   @id @default(uuid())
+  boardId  String
+  board    Board    @relation(fields: [boardId], references: [id])
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  action   String
+  createdAt DateTime @default(now())
+}

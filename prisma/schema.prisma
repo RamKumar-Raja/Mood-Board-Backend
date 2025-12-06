@@ -32,6 +32,7 @@ model Board {
   tiles        Tile[]
   activityLogs ActivityLog[]
   createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
 model Tile {
@@ -43,7 +44,10 @@ model Tile {
   tags      Json?
   positionX Int      @default(0)
   positionY Int      @default(0)
+  width     Int      @default(200)
+  height    Int      @default(200)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ActivityLog {

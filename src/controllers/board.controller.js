@@ -1,4 +1,4 @@
-import { createBoard, getBoards, getBoardById, updateBoard, deleteBoard } from '../services/board.service.js';
+import { createBoard, getBoards, getBoardById, updateBoard, deleteBoard, getBoardByShareId, getPublicBoards } from '../services/board.service.js';
 
 export const createBoardController = async (req, res, next) => {
   try {
@@ -24,6 +24,25 @@ export const getBoardByIdController = async (req, res, next) => {
     const { boardId } = req.params;
     const board = await getBoardById(boardId, req.user.id);
     res.json(board);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getBoardByShareIdController = async (req, res, next) => {
+  try {
+    const { shareId } = req.params;
+    const board = await getBoardByShareId(shareId);
+    res.json(board);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPublicBoardsController = async (req, res, next) => {
+  try {
+    const boards = await getPublicBoards();
+    res.json(boards);
   } catch (error) {
     next(error);
   }

@@ -29,16 +29,53 @@ export const getBoards = async (userId) => {
   return await prisma.board.findMany({
     where: { userId },
     include: { tiles: true },
+    orderBy: { createdAt: 'desc' }, // Using createdAt until updatedAt migration is applied
+  });
+};
+
+export const getPublicBoards = async () => {
+  return await prisma.board.findMany({
+    where: { isPublic: true },
+    include: { 
+      tiles: true, // Include ALL tiles so users can see them when viewing the board
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }, // Using createdAt until updatedAt migration is applied
   });
 };
 
 export const getBoardById = async (boardId, userId) => {
   const board = await prisma.board.findUnique({
     where: { id: boardId },
-    include: { tiles: true, activityLogs: true },
+    include: { tiles: true, activityLogs: { orderBy: { createdAt: 'desc' }, take: 10 } },
   });
   if (!board) throw new Error('Board not found');
   if (board.userId !== userId && !board.isPublic) throw new Error('Unauthorized');
+  return board;
+};
+
+export const getBoardByShareId = async (shareId) => {
+  const board = await prisma.board.findUnique({
+    where: { shareId },
+    include: { 
+      tiles: true, 
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        }
+      }
+    },
+  });
+  if (!board) throw new Error('Board not found');
+  if (!board.isPublic) throw new Error('Board is private');
   return board;
 };
 

@@ -3,8 +3,8 @@ import { createTile, updateTile, deleteTile } from '../services/tile.service.js'
 export const createTileController = async (req, res, next) => {
   try {
     const { boardId } = req.params;
-    const { imageUrl, caption, tags, positionX, positionY } = req.body;
-    const tile = await createTile(boardId, req.user.id, imageUrl, caption, tags, positionX, positionY);
+    const { imageUrl, caption, tags, positionX, positionY, width, height } = req.body;
+    const tile = await createTile(boardId, req.user.id, imageUrl, caption, tags, positionX, positionY, width, height);
     res.status(201).json(tile);
   } catch (error) {
     next(error);

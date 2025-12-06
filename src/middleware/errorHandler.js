@@ -13,6 +13,17 @@ const errorHandler = (err, req, res, next) => {
     return res.status(409).json({ error: 'Duplicate entry' });
   }
 
+  // Handle Prisma errors
+  if (err.code === 'P2025') {
+    return res.status(404).json({ error: 'Record not found' });
+  }
+
+  // Handle custom error messages
+  if (err.message) {
+    const statusCode = err.statusCode || 500;
+    return res.status(statusCode).json({ error: err.message });
+  }
+
   res.status(500).json({ error: 'Internal server error' });
 };
 

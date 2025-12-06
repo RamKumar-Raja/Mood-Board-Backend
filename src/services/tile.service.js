@@ -1,6 +1,6 @@
 import prisma from '../config/prisma.js';
 
-export const createTile = async (boardId, userId, imageUrl, caption, tags, positionX, positionY) => {
+export const createTile = async (boardId, userId, imageUrl, caption, tags, positionX, positionY, width, height) => {
   // Check if board exists and user has access
   const board = await prisma.board.findUnique({ where: { id: boardId } });
   if (!board || board.userId !== userId) throw new Error('Unauthorized');
@@ -10,9 +10,11 @@ export const createTile = async (boardId, userId, imageUrl, caption, tags, posit
       boardId,
       imageUrl,
       caption,
-      tags,
-      positionX,
-      positionY,
+      tags: tags || [],
+      positionX: positionX || 0,
+      positionY: positionY || 0,
+      width: width || 200,
+      height: height || 200,
     },
   });
 

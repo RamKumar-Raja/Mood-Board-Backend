@@ -14,6 +14,8 @@ const createTileSchema = z.object({
   tags: z.any().optional(),
   positionX: z.number().int().optional(),
   positionY: z.number().int().optional(),
+  width: z.number().int().optional(),
+  height: z.number().int().optional(),
 });
 
 const updateTileSchema = z.object({
@@ -21,6 +23,8 @@ const updateTileSchema = z.object({
   tags: z.any().optional(),
   positionX: z.number().int().optional(),
   positionY: z.number().int().optional(),
+  width: z.number().int().optional(),
+  height: z.number().int().optional(),
 });
 
 router.post('/:boardId/tiles', validate(createTileSchema), createTileController);

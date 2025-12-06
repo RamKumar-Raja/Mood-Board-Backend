@@ -281,23 +281,80 @@ package.json              # Dependencies and scripts
 
 ## 🚀 Deployment
 
-### Environment Variables for Production
+### Vercel Deployment
 
-Ensure these are set in your deployment platform:
+This backend is configured for seamless deployment on Vercel. Follow these steps:
 
-- `DATABASE_URL`: Supabase connection string
-- `JWT_ACCESS_SECRET`: Strong random string for access tokens
-- `JWT_REFRESH_SECRET`: Strong random string for refresh tokens
-- `CLOUDINARY_CLOUD_NAME`: Your Cloudinary cloud name
-- `CLOUDINARY_API_KEY`: Cloudinary API key
-- `CLOUDINARY_API_SECRET`: Cloudinary API secret
-- `FRONTEND_URL`: Your frontend application URL
+#### 1. Prerequisites
+- Vercel account and CLI installed
+- Supabase PostgreSQL database
+- Cloudinary account for image storage
 
-### Deployment Platforms
+#### 2. Deploy to Vercel
 
+**Option A: Using Vercel CLI**
+```bash
+# Install Vercel CLI if not already installed
+npm i -g vercel
+
+# Deploy from the Backend directory
+cd Backend
+vercel --prod
+```
+
+**Option B: Connect GitHub Repository**
+1. Go to [vercel.com](https://vercel.com)
+2. Click "Import Project"
+3. Connect your GitHub repository
+4. Set the root directory to `Backend`
+5. Deploy
+
+#### 3. Environment Variables
+
+Set these environment variables in your Vercel project settings:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string with pooling | `postgresql://user:pass@host:port/db?pgbouncer=true&connection_limit=1` |
+| `DIRECT_URL` | Direct PostgreSQL connection (for migrations) | `postgresql://user:pass@host:port/db` |
+| `JWT_ACCESS_SECRET` | Random string for JWT access tokens | `your-super-secret-access-key` |
+| `JWT_REFRESH_SECRET` | Random string for JWT refresh tokens | `your-super-secret-refresh-key` |
+| `JWT_ACCESS_EXPIRES_IN` | Access token expiration | `15m` |
+| `JWT_REFRESH_EXPIRES_IN` | Refresh token expiration | `7d` |
+| `CLOUDINARY_CLOUD_NAME` | Your Cloudinary cloud name | `your-cloud-name` |
+| `CLOUDINARY_API_KEY` | Cloudinary API key | `123456789012345` |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret | `your-api-secret` |
+| `FRONTEND_URL` | Frontend URL(s) for CORS | `https://your-frontend.vercel.app` |
+| `NODE_ENV` | Environment | `production` |
+
+#### 4. Database Migration
+
+After deployment, run database migrations:
+
+```bash
+# If using Vercel CLI locally
+vercel env pull .env.local
+npm run migrate
+
+# Or run migrations directly on your database using the migration SQL in prisma/migrations/
+```
+
+#### 5. Verify Deployment
+
+Your API will be available at: `https://your-project.vercel.app`
+
+Test the health check endpoint:
+```bash
+curl https://your-project.vercel.app/
+```
+
+### Other Deployment Platforms
+
+#### Railway
 - **Railway**: Connect GitHub repo, auto-deploys on push
+
+#### Render
 - **Render**: Web service with persistent disk
-- **Vercel**: Serverless functions (requires adapter)
 
 ### Build Commands
 
@@ -305,6 +362,7 @@ Ensure these are set in your deployment platform:
 {
   "scripts": {
     "build": "prisma generate",
+    "vercel-build": "prisma generate",
     "migrate": "prisma migrate deploy",
     "start": "node src/server.js"
   }

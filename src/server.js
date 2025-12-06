@@ -42,7 +42,7 @@ app.use('/boards', logRoutes);
 app.use('/upload', uploadRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
